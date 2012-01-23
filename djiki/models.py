@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from taggit.managers import TaggableManager
+
 class Versioned(object):
     def last_revision(self):
         try:
@@ -33,6 +35,7 @@ class Revision(models.Model):
 
 class Page(models.Model, Versioned):
     title = models.CharField(_("Title"), max_length=256, unique=True)
+    tags = TaggableManager()
 
     class Meta:
         ordering = ('title',)
