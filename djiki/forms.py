@@ -3,7 +3,14 @@ from django.utils.translation import ugettext as _
 from diff_match_patch import diff_match_patch
 from . import models, utils
 
+from taggit.forms import TagField
+from taggit.utils import parse_tags, edit_string_for_tags
+
 class PageEditForm(forms.ModelForm):
+
+    # tags = TagField(required=False)
+    tags = forms.CharField()
+
     prev_revision = forms.ModelChoiceField(
         queryset=models.PageRevision.objects.none(),
         widget=forms.HiddenInput(),
@@ -18,6 +25,8 @@ class PageEditForm(forms.ModelForm):
         self.page = kwargs.pop('page')
         super(PageEditForm, self).__init__(*args, **kwargs)
         if self.page.pk:
+            self.fields['tags'].initial = edit_string_for_tags(
+                    self.page.tags.all())
             self.fields['prev_revision'].queryset = self.page.revisions.all()
             self.fields['prev_revision'].initial = self.page.last_revision()
 
@@ -43,10 +52,24 @@ class PageEditForm(forms.ModelForm):
             self.cleaned_data['content'] = content
         return self.cleaned_data
 
+    def clean_tags(self):
+        value = self.cleaned_data['tags']
+        print 'value'
+        print value
+        try:
+            # self.cleaned_data['tags'] = parse_tags(value)
+            # print 'cleaned'
+            # print self.cleaned_data['tags']
+            return parse_tags(value)
+        except ValueError:
+            raise forms.ValidationError(_("Please provide a comma-separated list of tags."))
+
     def save(self, *args, **kwargs):
         if not self.page.pk:
             self.page.save()
             self.instance.page = self.page
+        print self.cleaned_data['tags']
+        self.page.tags.add(*self.cleaned_data['tags'])
         super(PageEditForm, self).save(*args, **kwargs)
 
 

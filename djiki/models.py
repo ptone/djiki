@@ -52,6 +52,7 @@ class PageRevision(Revision):
         return u"%s: %s" % (self.page, self.description)
 
 def invalidate_content(sender, instance=None, **kwargs):
+    # TODO: This doesn't look implemented
     instance.page.rendered_content = ''
     instance.page.save()
 models.signals.post_save.connect(invalidate_content, sender=PageRevision)
