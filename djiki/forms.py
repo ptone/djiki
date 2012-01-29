@@ -9,7 +9,7 @@ from taggit.utils import parse_tags, edit_string_for_tags
 class PageEditForm(forms.ModelForm):
 
     # tags = TagField(required=False)
-    tags = forms.CharField()
+    tags = forms.CharField(required=False)
 
     prev_revision = forms.ModelChoiceField(
         queryset=models.PageRevision.objects.none(),
