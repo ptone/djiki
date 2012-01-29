@@ -47,9 +47,17 @@ class Page(models.Model, Versioned):
 class PageRevision(Revision):
     page = models.ForeignKey(Page, related_name='revisions')
     content = models.TextField(_("Content"), blank=True)
+    current_version = models.BooleanField(default=True)
+
 
     def __unicode__(self):
         return u"%s: %s" % (self.page, self.description)
+
+    def save(self, *args, **kwargs):
+        PageRevision.objects.filter(page=self.page).update(
+                current_version=False)
+        self.current_version = True
+        super(PageRevision, self).save(*args, **kwargs)
 
 def invalidate_content(sender, instance=None, **kwargs):
     # TODO: This doesn't look implemented
