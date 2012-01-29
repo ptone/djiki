@@ -56,7 +56,7 @@ def view(request, title, revision_pk=None):
 
 def edit(request, title):
     if not allow_anonymous_edits() and not request.user.is_authenticated():
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("Forbidden")
     url_title = utils.urlize_title(title)
     if title != url_title:
         return HttpResponseRedirect(reverse('djiki-page-edit', kwargs={'title': url_title}))
