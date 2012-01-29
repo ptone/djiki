@@ -1,6 +1,7 @@
 from diff_match_patch import diff_match_patch
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
@@ -18,6 +19,7 @@ from djiki.utils import get_query
 def allow_anonymous_edits():
         return getattr(settings, 'DJIKI_ALLOW_ANONYMOUS_EDITS', True)
 
+@login_required
 def view(request, title, revision_pk=None):
     url_title = utils.urlize_title(title)
     if title != url_title:
