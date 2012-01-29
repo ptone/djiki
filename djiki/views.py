@@ -3,14 +3,17 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.template import RequestContext, loader
 from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe
 from django.views.generic.simple import direct_to_template
+from django.views.generic import ListView
 from urllib import urlencode, quote
 from . import models, forms, utils
 
+from djiki.models import Page, PageRevision
+from djiki.utils import get_query
 
 def allow_anonymous_edits():
         return getattr(settings, 'DJIKI_ALLOW_ANONYMOUS_EDITS', True)
@@ -233,3 +236,24 @@ def image_history(request, name):
     image = get_object_or_404(models.Image, name=image_name)
     history = image.revisions.order_by('-created')
     return direct_to_template(request, 'djiki/image_history.html', {'image': image, 'history': history})
+
+class AllView(ListView):
+    model = Page
+    template_name = 'page_list.html'
+    # TODO want to be able to group by headings of
+    # first letter
+    # tag
+    # date modified
+
+def search(request):
+    query_string = ''
+    found_entries = None
+    if ('q' in request.GET) and request.GET['q'].strip():
+        query_string = request.GET['q']
+        print query_string
+        entry_query = get_query(query_string, ['page__title', 'content',])
+        found_entries = PageRevision.objects.filter(entry_query, 
+                current_version=True) #.order_by('-pub_date')
+        # found_entries = PageRevision.objects.filter(content__icontains=query_string)
+    return render(request, 'djiki/search_results.html',
+            { 'query_string': query_string, 'found_entries': found_entries })

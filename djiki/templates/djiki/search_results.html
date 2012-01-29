@@ -1,0 +1,14 @@
+{% extends 'djiki/base.html' %}
+{% block page %}
+<h1>Search Results</h1>
+
+<ul>
+{% for page in found_entries %}
+<li><a href="{%url djiki.views.view page.page.title %}">{{ page.page.title }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}
+
+
+
+
