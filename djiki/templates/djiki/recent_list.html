@@ -2,17 +2,17 @@
 {% load tz %}
 {% block content %}
 <h1>Recent Changes</h1>
-
-{% regroup page_list by created|date:"d-m-Y" as months %}
-{% for month in months %}
-    <h2 id="{{ month.grouper }}">{{ month.grouper }}</h2>
-    <ul>
-        {% for item in tag.list %}
-        <li><a href={% url djiki.views.view item.page.title %}>{{ item.page.title }}</a><em>{{ item.description }}</em></li>
-        {% endfor %}
-        <li class="topper"><a href="#top">(top)</a></li>
+<ul>
+{% for item in page_list %}
+{% ifchanged %}
     </ul>
+<h2 id="{{ item.created|date:"b" }}>{{ item.created|date:"b" }}</h2>
+    <ul>
+{% endifchanged %}
+<li>{{ item.created|date }}<a href={% url djiki.views.view item.page.title %}>{{ item.page.title }}</a><em>{{ item.description }}</em></li>
     {% endfor %}
+    </ul>
 {% endblock %}
+
 
 
