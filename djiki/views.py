@@ -24,7 +24,7 @@ def allow_anonymous_edits():
         return getattr(settings, 'DJIKI_ALLOW_ANONYMOUS_EDITS', True)
 
 def user_or_site(request):
-    return request.META['REMOTE_ADDR'] == getattr(settings, "SITE_IP", '127.0.0.2') or request.user.is_authenticated()
+    return request.META['REMOTE_ADDR'] == getattr(settings, "SITE_IP", '127.0.0.1') or request.user.is_authenticated()
 
 def view(request, title, revision_pk=None):
     if not user_or_site(request):
