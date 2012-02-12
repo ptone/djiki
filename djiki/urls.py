@@ -17,4 +17,5 @@ urlpatterns = patterns('',
     url(r'^image/(?P<name>[^/]+)$', views.image_view, name='djiki-image-view'),
     url(r'^image/(?P<name>[^/]+)/edit/$', views.image_edit, name='djiki-image-edit'),
     url(r'^image/(?P<name>[^/]+)/history/$', views.image_history, name='djiki-image-history'),
+    url(r'^$','django.views.generic.simple.redirect_to', {'url': u'/wiki/Main_Page'}),
     )
