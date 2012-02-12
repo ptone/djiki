@@ -6,10 +6,15 @@ from . import models, utils
 from taggit.forms import TagField
 from taggit.utils import parse_tags, edit_string_for_tags
 
+from taggit_autosuggest.widgets import TagAutoSuggest
+
 class PageEditForm(forms.ModelForm):
 
     # tags = TagField(required=False)
-    tags = forms.CharField(required=False)
+    tags = forms.CharField(
+            widget=TagAutoSuggest,
+            required=False,
+            help_text="Keywords or topics this relates to")
 
     prev_revision = forms.ModelChoiceField(
         queryset=models.PageRevision.objects.none(),
@@ -69,7 +74,7 @@ class PageEditForm(forms.ModelForm):
             self.page.save()
             self.instance.page = self.page
         print self.cleaned_data['tags']
-        self.page.tags.add(*self.cleaned_data['tags'])
+        self.page.tags.set(*self.cleaned_data['tags'])
         super(PageEditForm, self).save(*args, **kwargs)
 
 
