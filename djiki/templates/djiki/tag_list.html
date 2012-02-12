@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Pages by tag</h1>
+
+{% regroup page_list by tag as tags %}
+{% for tag in tags %}
+    <h2 id="{{ tag.grouper }}">{{ tag.grouper }}</h2>
+    <ul>
+        {% for item in tag.list %}
+        <li><a href={% url djiki.views.view item.content_object.title %}>{{ item.content_object.title }}</a></li>
+        {% endfor %}
+        <li class="topper"><a href="#top">(top)</a></li>
+    </ul>
+    {% endfor %}
+{% endblock %}
+
+

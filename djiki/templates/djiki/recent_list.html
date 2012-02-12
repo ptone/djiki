@@ -6,10 +6,10 @@
 {% for item in page_list %}
 {% ifchanged %}
     </ul>
-<h2 id="{{ item.created|date:"b" }}>{{ item.created|date:"b" }}</h2>
+<h2 id="{{ item.created|date:"b" }}">{{ item.created|date:"b" }}</h2>
     <ul>
 {% endifchanged %}
-<li>{{ item.created|date }}<a href={% url djiki.views.view item.page.title %}>{{ item.page.title }}</a><em>{{ item.description }}</em></li>
+<li>{{ item.created|date:"b-d" }} <a href={% url djiki.views.view item.page.title %}>{{ item.page.title }}</a><em>{{ item.description }}</em></li>
     {% endfor %}
     </ul>
 {% endblock %}

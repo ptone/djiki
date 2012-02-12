@@ -2,12 +2,10 @@
 {% load i18n djiki_tags %}
 {% block title %}{{ page.title }} | {{ block.super }}{% endblock %}
 {% block djiki_actions %}
-<ul>
-	<li><a href="{% url djiki-page-view page.title|urlize_title %}">{% trans "Page" %}</a></li>
-	<li><a href="{% url djiki-page-edit page.title|urlize_title %}" rel="nofollow">{% trans "Edit page" %}</a></li>
-	<li><a href="{% url djiki-page-history page.title|urlize_title %}" rel="nofollow">{% trans "History" %}</a></li>
-	<li><a href="?raw=1" rel="nofollow">{% trans "Get source" %}</a></li>
-	<li><a href="{% url djiki-image-new %}" rel="nofollow">{% trans "Upload" %}</a></li>
-</ul>
+<a class="btn btn-small" href="{% url djiki-page-view page.title|urlize_title %}">{% trans "View Page" %}</a>
+<a class="btn btn-small" href="{% url djiki-page-edit page.title|urlize_title %}" rel="nofollow">{% trans "Edit page" %}</a>
+<a class="btn btn-small" href="{% url djiki-page-history page.title|urlize_title %}" rel="nofollow">{% trans "History" %}</a>
+<a class="btn btn-small" href="?raw=1" rel="nofollow">{% trans "Get source" %}</a>
+<a class="btn btn-small" href="{% url djiki-image-new %}" rel="nofollow">{% trans "Upload" %}</a>
 <div class="clear"></div>
 {% endblock %}
