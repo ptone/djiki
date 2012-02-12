@@ -1,7 +1,8 @@
-from diff_match_patch import diff_match_patch
+from urllib import urlencode, quote
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
@@ -10,17 +11,24 @@ from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe
 from django.views.generic.simple import direct_to_template
 from django.views.generic import ListView
-from urllib import urlencode, quote
+
+from diff_match_patch import diff_match_patch
 from . import models, forms, utils
 
 from djiki.models import Page, PageRevision
 from djiki.utils import get_query
 
+from taggit.models import TaggedItem
+
 def allow_anonymous_edits():
         return getattr(settings, 'DJIKI_ALLOW_ANONYMOUS_EDITS', True)
 
-@login_required
+def user_or_site(request):
+    return request.META['REMOTE_ADDR'] == getattr(settings, "SITE_IP", '127.0.0.2') or request.user.is_authenticated()
+
 def view(request, title, revision_pk=None):
+    if not user_or_site(request):
+        return redirect_to_login(request.get_full_path())
     url_title = utils.urlize_title(title)
     if title != url_title:
         if revision_pk:
@@ -56,7 +64,7 @@ def view(request, title, revision_pk=None):
 
 def edit(request, title):
     if not allow_anonymous_edits() and not request.user.is_authenticated():
-        return HttpResponseForbidden("Forbidden")
+        return redirect_to_login(request.get_full_path())
     url_title = utils.urlize_title(title)
     if title != url_title:
         return HttpResponseRedirect(reverse('djiki-page-edit', kwargs={'title': url_title}))
@@ -90,6 +98,8 @@ def edit(request, title):
             {'form': form, 'page': page, 'preview_content': preview_content})
 
 def history(request, title):
+    if not user_or_site(request):
+        return redirect_to_login(request.get_full_path())
     url_title = utils.urlize_title(title)
     if title != url_title:
         return HttpResponseRedirect(reverse('djiki-page-history', kwargs={'title': url_title}))
@@ -99,6 +109,8 @@ def history(request, title):
     return direct_to_template(request, 'djiki/history.html', {'page': page, 'history': history})
 
 def diff(request, title):
+    if not user_or_site(request):
+        return redirect_to_login(request.get_full_path())
     url_title = utils.urlize_title(title)
     if title != url_title:
         return HttpResponseNotFound()
@@ -116,7 +128,7 @@ def diff(request, title):
 
 def revert(request, title, revision_pk):
     if not allow_anonymous_edits() and not request.user.is_authenticated():
-        return HttpResponseForbidden()
+        return redirect_to_login(request.get_full_path())
     url_title = utils.urlize_title(title)
     if title != url_title:
         return HttpResponseRedirect(
@@ -145,7 +157,7 @@ def revert(request, title, revision_pk):
 
 def undo(request, title, revision_pk):
     if not allow_anonymous_edits() and not request.user.is_authenticated():
-        return HttpResponseForbidden()
+        return redirect_to_login(request.get_full_path())
     url_title = utils.urlize_title(title)
     if title != url_title:
         return HttpResponseRedirect(
@@ -195,6 +207,7 @@ def undo(request, title, revision_pk):
 def image_new(request):
     if not allow_anonymous_edits() and not request.user.is_authenticated():
         return HttpResponseForbidden()
+        return HttpResponseForbidden()
     form = forms.NewImageUploadForm(data=request.POST or None, files=request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -213,7 +226,7 @@ def image_view(request, name):
 
 def image_edit(request, name):
     if not allow_anonymous_edits() and not request.user.is_authenticated():
-        return HttpResponseForbidden()
+        return redirect_to_login(request.get_full_path())
     url_name = utils.urlize_title(name)
     if name != url_name:
         return HttpResponseRedirect(reverse('djiki-image-edit', kwargs={'name': url_name}))
@@ -241,11 +254,25 @@ def image_history(request, name):
 
 class AllView(ListView):
     model = Page
-    template_name = 'page_list.html'
+    template_name = 'djiki/page_list.html'
     # TODO want to be able to group by headings of
     # first letter
     # tag
     # date modified
+
+class TagView(ListView):
+    model = TaggedItem
+    template_name = 'djiki/tag_list.html'
+    queryset = TaggedItem.objects.filter(content_type__name='page').order_by('tag')
+    context_object_name = 'page_list'
+
+class RecentView(ListView):
+    model = PageRevision
+    template_name = 'djiki/recent_list.html'
+    queryset = TaggedItem.objects.filter(content_type__name='page').order_by('tag')
+    queryset = PageRevision.objects.filter(current_version=True).order_by('-created')
+    context_object_name = 'page_list'
+
 
 def search(request):
     query_string = ''
@@ -256,6 +283,7 @@ def search(request):
         entry_query = get_query(query_string, ['page__title', 'content',])
         found_entries = PageRevision.objects.filter(entry_query, 
                 current_version=True) #.order_by('-pub_date')
+        print len(found_entries)
         # found_entries = PageRevision.objects.filter(content__icontains=query_string)
     return render(request, 'djiki/search_results.html',
             { 'query_string': query_string, 'found_entries': found_entries })

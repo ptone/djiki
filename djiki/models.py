@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from taggit.managers import TaggableManager
+from taggit_autosuggest.managers import TaggableManager
 
 class Versioned(object):
     def last_revision(self):
@@ -26,7 +26,8 @@ class Versioned(object):
 class Revision(models.Model):
     created = models.DateTimeField(_("Created"), auto_now_add=True)
     author = models.ForeignKey(User, verbose_name=_("Author"), null=True, blank=True)
-    description = models.CharField(_("Description"), max_length=400, blank=True)
+    description = models.CharField(_("Description"), max_length=400, blank=True,
+            help_text="A brief description of what changes you've made")
 
     class Meta:
         abstract = True
@@ -35,7 +36,7 @@ class Revision(models.Model):
 
 class Page(models.Model, Versioned):
     title = models.CharField(_("Title"), max_length=256, unique=True)
-    tags = TaggableManager()
+    tags = TaggableManager(help_text="Keywords or topics this relates to")
 
     class Meta:
         ordering = ('title',)
@@ -48,7 +49,6 @@ class PageRevision(Revision):
     page = models.ForeignKey(Page, related_name='revisions')
     content = models.TextField(_("Content"), blank=True)
     current_version = models.BooleanField(default=True)
-
 
     def __unicode__(self):
         return u"%s: %s" % (self.page, self.description)

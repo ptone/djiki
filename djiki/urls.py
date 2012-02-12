@@ -2,7 +2,9 @@ from django.conf.urls.defaults import *
 from . import views
 
 urlpatterns = patterns('',
-    url(r'^special/all_pages/', views.AllView.as_view(), name='page_list'),
+    url(r'^special/all/', views.AllView.as_view(), name='page_list'),
+    url(r'^special/tags/', views.TagView.as_view(), name='tag_list'),
+    url(r'^special/recent/', views.RecentView.as_view(), name='recent_list'),
     url(r'^search', views.search, name='search'),
     url(r'^(?P<title>[^/]+)$', views.view, name='djiki-page-view'),
     url(r'^(?P<title>[^/]+)/edit/$', views.edit, name='djiki-page-edit'),
