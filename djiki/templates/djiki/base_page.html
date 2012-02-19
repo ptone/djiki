@@ -2,6 +2,7 @@
 {% load i18n djiki_tags %}
 {% block title %}{{ page.title }} | {{ block.super }}{% endblock %}
 {% block djiki_actions %}
+<a class="btn btn-small" href="{% url create %}">{% trans "Create New Page" %}</a>
 <a class="btn btn-small" href="{% url djiki-page-view page.title|urlize_title %}">{% trans "View Page" %}</a>
 <a class="btn btn-small" href="{% url djiki-page-edit page.title|urlize_title %}" rel="nofollow">{% trans "Edit page" %}</a>
 <a class="btn btn-small" href="{% url djiki-page-history page.title|urlize_title %}" rel="nofollow">{% trans "History" %}</a>

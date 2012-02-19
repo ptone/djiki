@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.template import RequestContext, loader
 from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe
@@ -125,6 +125,13 @@ def diff(request, title):
     diff = dmp.diff_compute(from_rev.content, to_rev.content, True, 2)
     return direct_to_template(request, 'djiki/diff.html',
             {'page': page, 'from_revision': from_rev, 'to_revision': to_rev, 'diff': diff})
+
+def create(request, title=None):
+    if request.method =='POST':
+        title = request.POST['title']
+        return redirect('djiki-page-edit', title=utils.urlize_title(title))
+    else:
+        return render(request, 'djiki/page_create.html')
 
 def revert(request, title, revision_pk):
     if not allow_anonymous_edits() and not request.user.is_authenticated():
